@@ -10,7 +10,7 @@ endif
 
 LITMUS_LIB = ../liblitmus2008/liblitmus.a
 
-LIB = ${LITMUS_LIB}
+LIB = eheap.o load.o ${LITMUS_LIB}
 
 .PHONY : all clean
 
@@ -22,10 +22,10 @@ APPS =  st2asy showst
 all: ${APPS}
 
 st2asy: st2asy.o ${LIB}
-	gcc ${CFLAGS} -lpthread  -o st2asy st2asy.o ${LIB}
+	gcc ${CFLAGS}  -o st2asy st2asy.o ${LIB}
 
-showst: showst.o ${LIB}
-	gcc ${CFLAGS} -lpthread  -o showst showst.o ${LIB}
+showst: showst.o eheap.o load.o ${LIB}
+	gcc ${CFLAGS}  -o showst showst.o ${LIB}
 
 clean:
 	rm -f *.o ${APPS}
