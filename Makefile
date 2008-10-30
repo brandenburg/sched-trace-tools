@@ -17,12 +17,15 @@ LIB = ${LITMUS_LIB}
 vpath %.h include/
 vpath %.c src/
 
-APPS =  st2asy
+APPS =  st2asy showst
 
 all: ${APPS}
 
 st2asy: st2asy.o ${LIB}
 	gcc ${CFLAGS} -lpthread  -o st2asy st2asy.o ${LIB}
+
+showst: showst.o ${LIB}
+	gcc ${CFLAGS} -lpthread  -o showst showst.o ${LIB}
 
 clean:
 	rm -f *.o ${APPS}
