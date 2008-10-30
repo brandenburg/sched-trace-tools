@@ -64,6 +64,7 @@ struct heap* load(char **files, int no_files, unsigned int *count)
 	int i;
 	unsigned int c;
 	struct heap *h = NULL, *h2;
+	*count = 0;
 	for (i = 0; i < no_files; i++) {
 		h2 = heap_from_file(files[i], &c);
 		if (!h2)
