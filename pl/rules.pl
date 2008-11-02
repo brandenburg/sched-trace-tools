@@ -18,6 +18,10 @@ parallel(Job1, Job2) :-
 parallelism(Time, Par) :-
 	(bagof(J, running_at(J, Time), Bag) -> length(Bag, Par) ; Par = 0).
 
+parallelism_in(Start, End, Pars) :-
+	setof((Time, P), X^Job^((scheduled(Job, X, Time) ; released(Job, Time)
+	), Start =< Time, End > Time, parallelism(Time, P)), Pars).
+
 running_at(Job, Time) :-
 	scheduled(Job, Start, Stop),
 	Start =< Time,
@@ -51,6 +55,10 @@ pending_at(Job, Time) :-
 no_pending_at(Time, N) :-
 	(bagof(J, pending_at(J, Time), Bag) -> length(Bag, N) ; N = 0).
 
+no_pending_in(Start, End, Ns) :-
+	setof((Time, P), X^Job^((scheduled(Job, X, Time) ; released(Job, Time)
+	), Start =< Time, End > Time, no_pending_at(Time, P)), Ns).
+
 earlier_deadline(Job1, Job2) :-
 	deadline(Job1, Dl1),
 	deadline(Job2, Dl2),
@@ -60,7 +68,7 @@ test_range(Job, Start, End) :-
 	released(Job, Start),
 	deadline(Job, D),
 	(completed(Job, C) -> End = C ; End = D).
-	
+
 in_range(Start, Stop, X) :-
 	Start =< X,
 	Stop > X.
@@ -103,6 +111,22 @@ not_sporadic(Job, Skew) :-
 	job_skew(Job, Skew),
 	Skew < 0.
 
+not_work_conserving_on_at(Cpus, Time) :-
+	parallelism(Time, P),
+	P < Cpus,
+	no_pending_at(Time, N),
+	N > P.
+
+not_work_conserving_on(Cpus, Job, Violation) :-
+	(
+	    scheduled(Job, _X, Violation) ;
+	    released(Job, Violation)
+	),
+	not_work_conserving_on_at(Cpus, Violation).
+
+not_work_conserving_on(Cpus, Violations) :-
+	setof(T, Job^not_work_conserving_on(Cpus, Job, T), Violations).
+
 not_edf(Job, Violator, Violation) :-
 	test_range(Job, Rel, Done),
 	earlier_deadline(Job, Violator),
@@ -117,19 +141,11 @@ not_edf(Job, Violator, Violation) :-
 	    )
 	).
 
+edf_violations(Violations) :-
+	bagof((Job, V, Vt), not_edf(Job, V, Vt), Violations).
 
-not_work_conserving_on_at(Cpus, Time) :-
-	parallelism(Time, P),
-	P < Cpus,
-	no_pending_at(Time, N),
-	N > P.
 
-not_work_conserving_on(Cpus, Job, Violation) :-
-	(
-	    scheduled(Job, _X, Violation) ; 
-	    released(Job, Violation)
-	),
-	not_work_conserving_on_at(Cpus, Violation).
-
-not_work_conserving_on(Cpus, Violations) :-
-	setof(T, Job^not_work_conserving_on(Cpus, Job, T), Violations).
+periodic :- \+ not_periodic(_Job, _Skew).
+sporadic :- \+ not_sporadic(_Job, _Skew).
+work_conserving_on(Cpus) :- \+ not_work_conserving_on(Cpus, _Job, __Vio).
+edf :- \+ not_edf(_Job, _Vio, _VioT).
