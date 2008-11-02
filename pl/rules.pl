@@ -27,6 +27,10 @@ running_at(Job, Time) :-
 	Start =< Time,
 	Stop > Time.
 
+last_scheduled(Job, A, B) :-
+	setof((X, Y), scheduled(Job, X, Y), Bag),
+	last(Bag, (A, B)).
+
 selected_in(Job, Start, End, Point) :-
 	scheduled(Job, X, _Y),
 	in_range(Start, End, X),
@@ -129,7 +133,6 @@ not_work_conserving_on(Cpus, Violations) :-
 
 not_edf(Job, Violator, Violation) :-
 	test_range(Job, Rel, Done),
-	earlier_deadline(Job, Violator),
 	(
 	    (
 		selected_in(Violator, Rel, Done, Violation),
@@ -139,11 +142,40 @@ not_edf(Job, Violator, Violation) :-
 		preempted_in(Job, Rel, Done, Violation),
 		running_at(Violator, Violation)
 	    )
-	).
+	),
+	earlier_deadline(Job, Violator).
 
 edf_violations(Violations) :-
 	bagof((Job, V, Vt), not_edf(Job, V, Vt), Violations).
 
+show_job(Job) :-
+	(completed(Job, C) -> X = C ; X = '[never]'),
+	(deadline(Job, D)  -> Y = D ; Y = '[never]'),
+	(released(Job, R)  -> Z = R ; Z = '[never]'),
+	write(Job),
+	write(' R='), write(Z),
+	write(' D='), write(Y),
+	write(' C='), write(X).
+
+show_sched_at(Job, At) :-
+	scheduled(Job, X, Y),
+	X =< At, Y > At,
+	write(' S=('), write(X), write(', '), write(Y), write(')').
+show_sched_at(_, _) :-
+	write(' S=[none]').
+
+list_violations([]).
+list_violations([(Job, V, Vt)|Rest]) :-
+	completed(Job, _A),completed(V, _B),
+	write(Vt), write(': '),
+	nl, write('\t'), show_job(V), show_sched_at(V, Vt), write(' before '),
+	nl, write('\t'), show_job(Job), show_sched_at(Job, Vt), nl,
+	list_violations(Rest).
+list_violations([(Job, _, _)|Rest]) :-
+	write('skip '), write(Job), nl,
+	list_violations(Rest).
+list_edf_violations :-
+	edf_violations(X), list_violations(X).
 
 periodic :- \+ not_periodic(_Job, _Skew).
 sporadic :- \+ not_sporadic(_Job, _Skew).
