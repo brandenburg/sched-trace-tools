@@ -55,7 +55,7 @@ static struct heap* heap_from_file(char* file, unsigned int* count)
 			/ sizeof(struct st_event_record);
 		return heapify_events(rec, *count);
 	} else
-		perror("mmap");
+		fprintf(stderr, "mmap: %m (%s)\n", file);
 	return NULL;
 }
 
