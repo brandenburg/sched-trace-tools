@@ -5,9 +5,11 @@
 #include <unistd.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "sched_trace.h"
 #include "eheap.h"
+#include "load.h"
 
 static int map_file(const char* filename, void **addr, size_t *size)
 {
@@ -77,4 +79,127 @@ struct heap* load(char **files, int no_files, unsigned int *count)
 		*count += c;
 	}
 	return h;
+}
+
+
+
+struct task tasks[MAX_TASKS];
+u64 time0 = 0;
+u32 g_max_task = MAX_TASKS;
+u32 g_min_task = 0;
+
+void crop_events(struct task* t, double min, double max)
+{
+	struct evlink **p;
+	double time;
+	p = &t->events;
+	while (*p) {
+		time = evtime((*p)->rec);
+		if (time < min || time > max)
+			*p = (*p)->next;
+		else
+			p = &(*p)->next;
+	}
+}
+
+void crop_events_all(double min, double max)
+{
+	struct task* t;
+	for_each_task(t)
+		crop_events(t, min, max);
+}
+
+struct task* by_pid(int pid)
+{
+	struct task* t;
+	/* slow, don't care for now */
+	for (t = tasks; t < tasks + MAX_TASKS; t++) {
+		if (!t->pid) /* end, allocate */
+			t->pid = pid;
+		if (t->pid == pid)
+			return t;
+	}
+	return NULL;
+}
+
+u32 count_tasks(void)
+
+{
+	struct task* t;
+	u32 i = 0;	
+	for_each_task(t)
+		i++;
+	return i;
+}
+
+
+void split(struct heap* h, unsigned int count)
+{
+	struct evlink *lnk = malloc(count * sizeof(struct evlink));
+	struct heap_node *hn;
+	u64 time;
+	struct st_event_record *rec;
+	struct task* t;
+
+	if (!lnk) {
+		perror("malloc");
+		return;
+	}
+
+	while ((hn = heap_take(earlier_event, h))) {
+		rec = heap_node_value(hn);
+		time =  event_time(rec);
+		if (!time0 && time)
+			time0 = time;
+		t = by_pid(rec->hdr.pid);
+		if (!t) {
+			printf("dropped %d\n", rec->hdr.pid);
+			continue;
+		}
+		switch (rec->hdr.type) {
+		case ST_PARAM:
+			t->param = rec;
+			break;
+		case ST_NAME:
+			t->name = rec;
+			break;
+		default:
+			lnk->rec = rec;
+			lnk->next = NULL;
+			*(t->next) = lnk;
+			t->next = &lnk->next;
+			lnk++;
+			t->no_events++;
+			break;
+		}
+	}
+}
+
+const char* tsk_name(struct task* t)
+{
+	if (t->name)
+		return t->name->data.name.cmd;
+	else
+		return "<unknown>";
+}
+
+u32 per(struct task* t)
+{
+	if (t->param)
+		return t->param->data.param.period;
+	else
+		return 0;
+}
+
+u32 exe(struct task* t)
+{
+	if (t->param)
+		return t->param->data.param.wcet;
+	else
+		return 0;
+}
+
+u32 idx(struct task* t)
+{
+	return (t - tasks);
 }
