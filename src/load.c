@@ -84,6 +84,8 @@ struct heap* load(char **files, int no_files, unsigned int *count)
 
 
 struct task tasks[MAX_TASKS];
+struct evlink *sys_events = NULL;
+struct evlink **sys_next  = &sys_events;
 u64 time0 = 0;
 u32 g_max_task = MAX_TASKS;
 u32 g_min_task = 0;
@@ -112,6 +114,8 @@ void crop_events_all(double min, double max)
 struct task* by_pid(int pid)
 {
 	struct task* t;
+	if (!pid)
+		return NULL;
 	/* slow, don't care for now */
 	for (t = tasks; t < tasks + MAX_TASKS; t++) {
 		if (!t->pid) /* end, allocate */
@@ -152,8 +156,8 @@ void split(struct heap* h, unsigned int count)
 		if (!time0 && time)
 			time0 = time;
 		t = by_pid(rec->hdr.pid);
-		if (!t) {
-			printf("dropped %d\n", rec->hdr.pid);
+		if (!t && rec->hdr.pid) {
+			fprintf(stderr, "dropped %d\n", rec->hdr.pid);
 			continue;
 		}
 		switch (rec->hdr.type) {
@@ -166,10 +170,15 @@ void split(struct heap* h, unsigned int count)
 		default:
 			lnk->rec = rec;
 			lnk->next = NULL;
-			*(t->next) = lnk;
-			t->next = &lnk->next;
+			if (t) {
+				*(t->next) = lnk;
+				t->next = &lnk->next;
+				t->no_events++;
+			} else {
+				*(sys_next) = lnk;
+				sys_next    = &lnk->next;
+			}
 			lnk++;
-			t->no_events++;
 			break;
 		}
 	}

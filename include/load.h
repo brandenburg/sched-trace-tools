@@ -23,6 +23,7 @@ struct task {
 #define MAX_TASKS 100
 
 extern struct task tasks[MAX_TASKS];
+extern struct evlink* sys_events;
 extern u64 time0;
 extern u32 g_min_task;
 extern u32 g_max_task;
