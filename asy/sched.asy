@@ -43,7 +43,7 @@ pair task_y(int idx=0, pair base=(0,0))
 
 pair task_offset(int idx=0, pair base=(0,0))
 {
-	pair y = task_y(idx, base);	
+	pair y = task_y(idx, base);
 //	return y + (-__from, 0.0);
 	return y;
 }
@@ -52,11 +52,11 @@ pair task_offset(int idx=0, pair base=(0,0))
 void task(picture pic=currentpicture, int idx=0, int pid, real exe=0.0, real per=0.0)
 {
 	string txt = format("$T_{%d}", pid);
-	if (exe != 0.0 && per != 0.0) { 
+	if (exe != 0.0 && per != 0.0) {
 	   txt = txt + format(" = (%f,", exe) + format(" %f)", per);
-	} 
+	}
 	txt += "$";
-	label(pic, txt , 
+	label(pic, txt ,
 	      task_y(idx) + (__from, -0.15), W);
 }
 
@@ -65,7 +65,7 @@ real center = 0.2 - (0.7 / 2.0);
 void scheduled(picture pic=currentpicture, int idx=0, int cpu=0,  pair time) {
      path g = (time.x, 0.2)--(time.y, 0.2)--(time.y, -0.5)--(time.x, -0.5)--cycle;
      filldraw(pic, shift(task_offset(idx)) *  g, idx2color(cpu));
-} 
+}
 
 void release(picture pic=currentpicture, int idx=0, real when) {
      path g = (when, -0.5)--(when, 0.5)--(when + 0.1, 0.35)--(when - 0.1, 0.35)--(when, 0.5);
@@ -98,8 +98,8 @@ void completed(picture pic=currentpicture, int idx=0, real when) {
      draw(pic,  shift(task_offset(idx)) * g2, solid + 0.5);
 }
 
-void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from, real t=__to,
-	       int tasks=1)
+void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from,
+	       real t=__to, int tasks=1, real xlabelstep=10.0)
 {
 	real pos = f;
 	int idx = 0;
@@ -114,6 +114,13 @@ void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from, real t
 		path g = task_y(0, (pos, -1))--task_y(tasks - 1, (pos, 1.0));
 		draw(pic, g, grid_pen);
 		pos = pos + xstep;
-	};
+	}
+
+	pos = f;
+	while (pos <= t) {
+		string l = format("%f", pos);
+		label(pic, l, task_y(0, (pos, -1.2)), grid_pen);
+		pos = pos + xlabelstep;
+	}
 
 }
