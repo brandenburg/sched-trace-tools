@@ -1,7 +1,8 @@
 *.o
 *.a
 *.eps
+*.pdf
 showst
-st2asy
+st2pl
 \#*
 .\#*
