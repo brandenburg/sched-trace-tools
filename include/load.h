@@ -49,7 +49,7 @@ void crop_events_all(double min, double max);
 
 struct task* by_pid(int pid);
 
-void split(struct heap* h, unsigned int count);
+void split(struct heap* h, unsigned int count, int find_time0);
 
 const char* tsk_name(struct task* t);
 u32 per(struct task* t);

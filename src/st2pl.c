@@ -24,7 +24,7 @@ static void write_prolog_kb(void)
 	for_each_task(t) {
 		for_each_event_t(t, e, ST_RELEASE)
 			printf("released(job(%u, %u), %f).\n",
-			       e->rec->hdr.pid, 
+			       e->rec->hdr.pid,
 			       e->rec->hdr.job,
 			       ns2ms_adj(e->rec->data.release.release));
 	}
@@ -32,7 +32,7 @@ static void write_prolog_kb(void)
 	for_each_task(t) {
 		for_each_event_t(t, e, ST_RELEASE)
 			printf("deadline(job(%u, %u), %f).\n",
-			       e->rec->hdr.pid, 
+			       e->rec->hdr.pid,
 			       e->rec->hdr.job,
 			       ns2ms_adj(e->rec->data.release.deadline));
 	}
@@ -126,7 +126,7 @@ static void write_asy(double from, double to, double scale)
 		for_each_event_t(t, e, ST_RELEASE) {
 			t1 = ns2ms_adj(e->rec->data.release.release);
 			t2 = ns2ms_adj(e->rec->data.release.deadline);
-			if (in_range(from, t1, to)) 
+			if (in_range(from, t1, to))
 				printf("release(%u, %f);\n", idx(t), t1);
 			if (in_range(from, t2, to))
 				printf("deadline(%u, %f);\n", idx(t), t2);
@@ -164,7 +164,7 @@ static void write_asy(double from, double to, double scale)
 
 static void usage(const char *str)
 {
-	fprintf(stderr, 
+	fprintf(stderr,
 		"\n  USAGE\n"
 		"\n"
 		"    st2pl [opts] <file.st>+\n"
@@ -182,7 +182,7 @@ static void usage(const char *str)
 typedef enum {
 	UNKNOWN,
 	PROLOG,
-	ASYMPTOTE,	
+	ASYMPTOTE,
 } lang_t;
 
 #define streq(a, b) (0 == strcmp(a, b))
@@ -235,15 +235,18 @@ int main(int argc, char** argv)
 			break;
 		case 'm':
 			g_min_task = atoi(optarg);
-			if (g_min_task > g_max_task)
-				g_min_task = g_max_task;
+			if (g_min_task > g_max_task) {
+				usage("-m cannot exceed -M.");
+			}
 			break;
 		case 'M':
 			g_max_task = atoi(optarg);
-			if (g_min_task > g_max_task)
-				g_max_task = g_min_task;
-			if (g_max_task > MAX_TASKS)
+			if (g_min_task > g_max_task) {
+				usage("-m cannot exceed -M.");
+			}
+			if (g_max_task > MAX_TASKS) {
 				g_max_task = MAX_TASKS;
+			}
 			break;
 		case 'h':
 			usage("Help requested.");
@@ -263,7 +266,7 @@ int main(int argc, char** argv)
 	if (!h)
 		usage("Loading traces failed.");
 	fprintf(stderr, "Loaded %u events.\n", count);
-	split(h, count);
+	split(h, count, 0);
 	switch (mode) {
 	case PROLOG:
 		crop_events_all(from, to);

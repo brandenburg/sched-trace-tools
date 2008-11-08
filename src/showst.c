@@ -18,10 +18,10 @@ int main(int argc, char** argv)
 	printf("Loaded %u events.\n", count);
 	while ((hn = heap_take(earlier_event, h))) {
 		time =  event_time(heap_node_value(hn));
-		if (!start_time && time)
+/*		if (!start_time && time)
 			start_time = time;
 		time -= start_time;
-		time /= 1000000; /* convert to milliseconds */
+*/		time /= 1000000; /* convert to milliseconds */
 		printf("[%10llu] ", time);
 		print_event(heap_node_value(hn));
 	}

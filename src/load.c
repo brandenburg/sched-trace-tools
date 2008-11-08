@@ -130,14 +130,14 @@ u32 count_tasks(void)
 
 {
 	struct task* t;
-	u32 i = 0;	
+	u32 i = 0;
 	for_each_task(t)
 		i++;
 	return i;
 }
 
 
-void split(struct heap* h, unsigned int count)
+void split(struct heap* h, unsigned int count, int find_time0)
 {
 	struct evlink *lnk = malloc(count * sizeof(struct evlink));
 	struct heap_node *hn;
@@ -153,7 +153,7 @@ void split(struct heap* h, unsigned int count)
 	while ((hn = heap_take(earlier_event, h))) {
 		rec = heap_node_value(hn);
 		time =  event_time(rec);
-		if (!time0 && time)
+		if (find_time0 && !time0 && time)
 			time0 = time;
 		t = by_pid(rec->hdr.pid);
 		if (!t && rec->hdr.pid) {
