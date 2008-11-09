@@ -1,0 +1,156 @@
+#!/bin/bash
+#    st_draw --- Draw binary sched_trace traces as nicely formatted PDFs. 
+#    Copyright (C) 2008 B. Brandenburg, <bbb@cs.unc.edu>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+ST_SHOW=showst
+ST2PL=st2pl
+ASY=asy
+SHOW_PDF=evince
+
+function die {
+    echo "(EE) $*"
+    exit 1
+}
+
+function info {
+    echo "(II) $*"
+}
+
+KEEP=
+NO_SHOW=
+NAME=
+FROM=
+TO=
+LENGTH=1000
+while true
+do
+  case "$1" in
+      -f | --from)
+	  shift
+	  FROM=$1
+	  shift
+	  ;;
+      -t | --to)
+	  shift
+	  TO=$1
+	  shift
+	  ;;
+      -l | --length)
+	  shift
+	  LENGTH=$1
+	  shift
+	  ;;
+      -k | --keep)
+	  KEEP=yes
+          shift
+	  ;;
+      --no-show)
+	  NO_SHOW=yes
+	  shift
+	  ;;
+      -n | --name)
+	  shift
+	  NAME=$1
+	  shift
+	  ;;
+      -h | --help)
+	  cat <<EOF
+LITMUS^RT Schedule Drawing Utility
+(c) 2008 B. Brandenburg <bbb@cs.unc.edu>
+
+Usage: st_draw [OPTIONS] <sched trace file>+
+
+Options:	
+	-f FROM
+	--from FROM	Start at time FROM. 
+			Time of system release if not specified.
+
+	-l LENGTH
+	--length LENGTH	Draw schedule of length LENGTH. (Default: 1000)
+
+	-t TO
+	--to TO		Draw schedule up to time TO. (Default: FROM + LENGTH)
+			If given, then LENGTH is ignored.
+
+	-n NAME
+	--name NAME	Filename to use.
+
+	-k
+	--keep		Keep the generated .asy/.pdf files.
+
+	--no-show	Don't start a PDF document viewer.
+	
+	-h
+	--help		Show this message and exit.
+EOF
+	  exit 0
+	  ;;
+      *)
+	  break
+	  ;;
+  esac
+done
+
+TRACES=$*
+info "Trace files: $TRACES"
+
+if [ -z "$FROM" ]
+then
+    info "Searching for task system release..."
+    FROM=`$ST_SHOW $TRACES | grep SYS_RELEASE | head -1 | awk '{print $8}' | sed 's/\.[0-9]*ms//'`
+    if [ -z "$FROM" ]
+    then
+	error "No task system release found in trace."
+    else
+	info "Task system released at $FROM."
+    fi
+fi
+
+if [ -z "$TO" ]
+then
+    TO=$(($FROM + $LENGTH))
+fi
+
+info "Drawing schedule from $FROM to $TO."
+
+if [ ! -z "$NAME" ]
+then
+    SCHED="${NAME}.asy"
+    PDF="${NAME}.pdf"
+else
+    SCHED=`mktemp`
+    PDF=`mktemp`
+fi
+
+info "Drawing schedule..."
+$ST2PL -lasy -f $FROM -t $TO -s 0.4 $TRACES > $SCHED || die "$ST2PL failed."
+info "Generating PDF..."
+$ASY   -f pdf -o $PDF $SCHED || die "$ASY failed."
+
+if [ -z "$NO_SHOW" ]
+then
+    $SHOW_PDF $PDF || die "$SHOW_PDF failed."
+fi
+
+if [ -z "$KEEP" ]
+then
+    rm -f $SCHED $PDF
+else
+    info "ASY: $SCHED"
+    info "PDF: $PDF"
+fi
