@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 #    st_draw --- Draw binary sched_trace traces as nicely formatted PDFs. 
 #    Copyright (C) 2008 B. Brandenburg, <bbb@cs.unc.edu>
 #
@@ -17,8 +18,8 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-ST_SHOW=showst
-ST2PL=st2pl
+ST_SHOW=st_show
+ST2PL=st_convert
 ASY=asy
 SHOW_PDF=evince
 

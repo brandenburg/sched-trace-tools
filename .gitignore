@@ -2,7 +2,7 @@
 *.a
 *.eps
 *.pdf
-showst
-st2pl
+st_show
+st_convert
 \#*
 .\#*

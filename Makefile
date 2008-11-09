@@ -17,15 +17,15 @@ LIB = eheap.o load.o ${LITMUS_LIB}
 vpath %.h include/
 vpath %.c src/
 
-APPS =  st2pl showst
+APPS =  st_show st_convert
 
 all: ${APPS}
 
-st2pl: st2pl.o ${LIB}
-	gcc ${CFLAGS}  -o st2pl st2pl.o ${LIB}
+st_convert: st2pl.o ${LIB}
+	gcc ${CFLAGS}  -o st_convert st2pl.o ${LIB}
 
-showst: showst.o eheap.o load.o ${LIB}
-	gcc ${CFLAGS}  -o showst showst.o ${LIB}
+st_show: showst.o eheap.o load.o ${LIB}
+	gcc ${CFLAGS}  -o st_show showst.o ${LIB}
 
 clean:
 	rm -f *.o ${APPS}
