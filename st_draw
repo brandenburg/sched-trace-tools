@@ -139,7 +139,7 @@ else
 fi
 
 info "Drawing schedule..."
-$ST2PL -lasy -f $FROM -t $TO -s 0.4 $TRACES > $SCHED || die "$ST2PL failed."
+$ST2PL -lasy -f $FROM -t $TO $TRACES > $SCHED || die "$ST2PL failed."
 info "Generating PDF..."
 $ASY   -f pdf -o $PDF $SCHED || die "$ASY failed."
 

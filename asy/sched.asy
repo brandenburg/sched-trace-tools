@@ -3,6 +3,9 @@ import palette;
 
 real __from = 0.0;
 real __to   = 0.0;
+int  __no_tasks = 0;
+real __scale = 1.0;
+real __time_scale = 1.0;
 
 void start_time(real when)
 {
@@ -12,6 +15,28 @@ void start_time(real when)
 void end_time(real when)
 {
   __to = when;
+}
+
+void number_of_tasks(int n)
+{
+	__no_tasks = n;
+}
+
+void prepare_schedule(picture pic=currentpicture,
+		      real t0, real t1, int no_tasks)
+{
+	real delta = t1 - t0;
+	start_time(t0);
+	end_time(t1);
+	number_of_tasks(no_tasks);
+	if (delta > 2000) {
+		__time_scale = 2000 / delta;
+	}
+	if (delta > 450) {
+		__scale = 450.0 / delta;
+		delta = 450;
+	}
+	size(pic, delta * cm, no_tasks * 1.5cm, false);
 }
 
 pen[] task_fill = {
@@ -99,7 +124,7 @@ void completed(picture pic=currentpicture, int idx=0, real when) {
 }
 
 void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from,
-	       real t=__to, int tasks=1, real xlabelstep=10.0)
+	       real t=__to, int tasks=__no_tasks, real xlabelstep=10.0)
 {
 	real pos = f;
 	int idx = 0;
@@ -118,8 +143,10 @@ void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from,
 
 	pos = f;
 	while (pos <= t) {
-		string l = format("%f", pos);
+		Label l = scale(__time_scale) * Label(format("%f", pos));
 		label(pic, l, task_y(0, (pos, -1.2)), grid_pen);
+		path g = task_y(0, (pos, -0.8))--task_y(0, (pos - 0.5, -1.0))--task_y(0, (pos + 0.5, -1.0))--cycle;
+		fill(pic, g, grid_pen);
 		pos = pos + xlabelstep;
 	}
 

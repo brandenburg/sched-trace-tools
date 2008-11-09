@@ -89,7 +89,7 @@ int in_range(double from, double x, double to)
 	return from <= x && x <= to;
 }
 
-static void write_asy(double from, double to, double scale)
+static void write_asy(double from, double to)
 {
 	struct task *t;
 	struct evlink *e, *e2;
@@ -97,11 +97,8 @@ static void write_asy(double from, double to, double scale)
 	u32 n = count_tasks();
 
 	printf("import sched;\n");
-
-	printf("size(%fcm, %fcm, false);\n", (to - from) * scale, n * 1.5);
-	printf("start_time(%f); end_time(%f);\n", from, to);
-
-	printf("draw_grid(xstep=1.0, tasks=%u);\n", n);
+	printf("prepare_schedule(%f, %f, %d);\n", from, to, n);
+	printf("draw_grid();\n");
 
 	for_each_task(t) {
 		printf("task(%u, %u, %f, %f);\n",
@@ -197,7 +194,7 @@ static lang_t str2mode(const char* str)
 }
 
 
-#define OPTSTR "f:t:l:m:M:s:"
+#define OPTSTR "f:t:l:m:M:"
 
 int main(int argc, char** argv)
 {
@@ -206,7 +203,6 @@ int main(int argc, char** argv)
 	int opt;
 	double from = 0.0;
 	double to   = DBL_MAX;
-	double scale = 1; /* cm per ms */
 	lang_t mode = PROLOG;
 	struct heap *h;
 
@@ -227,11 +223,6 @@ int main(int argc, char** argv)
 			break;
 		case 't':
 			to = atof(optarg);
-			break;
-		case 's':
-			scale = atof(optarg);
-			if (scale <= 0.0)
-				usage("Scale must be > 0 cm/ms.");
 			break;
 		case 'm':
 			g_min_task = atoi(optarg);
@@ -273,7 +264,7 @@ int main(int argc, char** argv)
 		write_prolog_kb();
 		break;
 	case ASYMPTOTE:
-		write_asy(from, to, scale);
+		write_asy(from, to);
 		break;
 	default:
 		usage("WTF?");
