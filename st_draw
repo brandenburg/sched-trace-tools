@@ -119,6 +119,7 @@ then
 	error "No task system release found in trace."
     else
 	info "Task system released at $FROM."
+	FROM=$((($FROM / 10) * 10))
     fi
 fi
 
