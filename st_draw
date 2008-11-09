@@ -74,7 +74,7 @@ do
 LITMUS^RT Schedule Drawing Utility
 (c) 2008 B. Brandenburg <bbb@cs.unc.edu>
 
-Usage: st_draw [OPTIONS] <sched trace file>+
+Usage: st_draw [OPTIONS] <sched trace file>*
 
 Options:	
 	-f FROM
@@ -89,7 +89,8 @@ Options:
 			If given, then LENGTH is ignored.
 
 	-n NAME
-	--name NAME	Filename to use.
+	--name NAME	Filename to use. If no trace files are specified,
+			then st-NAME-*.bin is used instead.
 
 	-k
 	--keep		Keep the generated .asy/.pdf files.
@@ -108,7 +109,17 @@ EOF
 done
 
 TRACES=$*
-info "Trace files: $TRACES"
+if [ ! -z "$NAME" ] && [ -z "$TRACES" ]
+then
+    TRACES=`ls st-$NAME-*.bin 2> /dev/null`
+fi
+
+if [ -z "$TRACES" ]
+then
+    error "Trace files missing."
+else
+    info "Trace files: " $TRACES
+fi
 
 if [ -z "$FROM" ]
 then
