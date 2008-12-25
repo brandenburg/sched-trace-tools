@@ -8,7 +8,11 @@ int earlier_event(struct heap_node* _a, struct heap_node* _b)
 	struct st_event_record *a, *b;
 	a = heap_node_value(_a);
 	b = heap_node_value(_b);
-	return event_time(a) < event_time(b);
+	if (event_time(a) == 0 && event_time(b) == 0)
+		/* tie break by PID for consistent ordering */
+		return a->hdr.pid < b->hdr.pid;
+	else
+		return event_time(a) < event_time(b);
 }
 
 
