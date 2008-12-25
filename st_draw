@@ -116,7 +116,7 @@ fi
 
 if [ -z "$TRACES" ]
 then
-    error "Trace files missing."
+    die "Trace files missing."
 else
     info "Trace files: " $TRACES
 fi
@@ -127,7 +127,7 @@ then
     FROM=`$ST_SHOW $TRACES | grep SYS_RELEASE | head -1 | awk '{print $8}' | sed 's/\.[0-9]*ms//'`
     if [ -z "$FROM" ]
     then
-	error "No task system release found in trace."
+	die "No task system release found in trace."
     else
 	info "Task system released at $FROM."
 	FROM=$((($FROM / 10) * 10))
@@ -137,6 +137,13 @@ fi
 if [ -z "$TO" ]
 then
     TO=$(($FROM + $LENGTH))
+    LAST=`$ST_SHOW $TRACES | tail -1 | awk '{print $2}' | sed 's/]//'`
+    LASTB=$((($LAST / 10 + 1) * 10))
+    if [ $TO -gt $LASTB ]
+    then
+	info "Last event  recorded at $LAST."
+	TO=$LASTB
+    fi
 fi
 
 info "Drawing schedule from $FROM to $TO."
@@ -147,7 +154,7 @@ then
     PDF="${NAME}.pdf"
 else
     SCHED=`mktemp`
-    PDF=`mktemp`
+    PDF="${SCHED}.pdf"
 fi
 
 info "Drawing schedule..."
@@ -157,6 +164,7 @@ $ASY   -f pdf -o $PDF $SCHED || die "$ASY failed."
 
 if [ -z "$NO_SHOW" ]
 then
+    info $SHOW_PDF $PDF
     $SHOW_PDF $PDF || die "$SHOW_PDF failed."
 fi
 
