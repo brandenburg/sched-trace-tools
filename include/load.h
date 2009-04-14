@@ -20,7 +20,7 @@ struct task {
 	struct evlink** next;
 };
 
-#define MAX_TASKS 100
+#define MAX_TASKS 1000
 
 extern struct task tasks[MAX_TASKS];
 extern struct evlink* sys_events;
