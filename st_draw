@@ -124,7 +124,7 @@ fi
 if [ -z "$FROM" ]
 then
     info "Searching for task system release..."
-    FROM=`$ST_SHOW $TRACES | grep SYS_RELEASE | head -1 | awk '{print $8}' | sed 's/\.[0-9]*ms//'`
+    FROM=`$ST_SHOW -r $TRACES | sed 's/\.[0-9]*ms//'`
     if [ -z "$FROM" ]
     then
 	die "No task system release found in trace."
