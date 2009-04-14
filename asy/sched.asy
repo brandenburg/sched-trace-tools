@@ -40,17 +40,53 @@ void prepare_schedule(picture pic=currentpicture,
 }
 
 pen[] task_fill = {
-      rgb(1.0,0,0),
-      rgb(0,0,1.0),
-      rgb(0,1.0,0),
-      rgb(1.0, 0, 1.0),
-      rgb(0, 1.0, 1.0),
-      rgb(1.0, 1.0, 0)
+  /*
+    rgb(1.0,0,0),
+    rgb(0,0,1.0),
+    rgb(0,1.0,0),
+    rgb(1.0, 0, 1.0),
+    rgb(0, 1.0, 1.0),
+    rgb(1.0, 1.0, 0)
+  */
+  rgb(0.0000, 0.1667, 1.0000),
+  rgb(1.0000, 0.0833, 0.0000),
+  rgb(0.0417, 1.0000, 0.0000),
+  rgb(0.9583, 0.0000, 1.0000),
+  rgb(0.9792, 1.0000, 0.0000),
+  rgb(0.0000, 1.0000, 0.8958),
+  rgb(0.3958, 0.0000, 1.0000),
+  rgb(1.0000, 0.0000, 0.4792),
+  rgb(0.6042, 1.0000, 0.0000),
+  rgb(0.0000, 0.7292, 1.0000),
+  rgb(0.0000, 1.0000, 0.3333),
+  rgb(1.0000, 0.4583, 0.0000),
+  rgb(0.0208, 0.0000, 1.0000),
+  rgb(1.0000, 0.8333, 0.0000),
+  rgb(0.2083, 0.0000, 1.0000),
+  rgb(0.7917, 1.0000, 0.0000),
+  rgb(0.5833, 0.0000, 1.0000),
+  rgb(0.4167, 1.0000, 0.0000),
+  rgb(0.7708, 0.0000, 1.0000),
+  rgb(0.2292, 1.0000, 0.0000),
+  rgb(1.0000, 0.0000, 0.8542),
+  rgb(0.0000, 1.0000, 0.1458),
+  rgb(1.0000, 0.0000, 0.6667),
+  rgb(0.0000, 1.0000, 0.5208),
+  rgb(1.0000, 0.0000, 0.2917),
+  rgb(0.0000, 1.0000, 0.7083),
+  rgb(1.0000, 0.0000, 0.1042),
+  rgb(0.0000, 0.9167, 1.0000),
+  rgb(1.0000, 0.2708, 0.0000),
+  rgb(0.0000, 0.5417, 1.0000),
+  rgb(1.0000, 0.6458, 0.0000),
+  rgb(0.0000, 0.3542, 1.0000)  
 };
 
 pen[] cpu_fill = task_fill;
 
-pen grid_pen = solid + gray(0.75);
+pen grid_pen  = solid + gray(0.75);
+
+pen cpu_label_pen = solid + rgb(0.0, 0.0, 0.0);
 
 pen idx2color(int idx) {
     return cpu_fill[idx % cpu_fill.length];
@@ -90,6 +126,8 @@ real center = 0.2 - (0.7 / 2.0);
 void scheduled(picture pic=currentpicture, int idx=0, int cpu=0,  pair time) {
      path g = (time.x, 0.2)--(time.y, 0.2)--(time.y, -0.5)--(time.x, -0.5)--cycle;
      filldraw(pic, shift(task_offset(idx)) *  g, idx2color(cpu));
+     Label l = scale(0.6) * Label(format("%d", cpu));
+     label(pic, l, task_y(idx, (time.x + 0.15, +0.05)), cpu_label_pen);
 }
 
 void release(picture pic=currentpicture, int idx=0, real when) {
