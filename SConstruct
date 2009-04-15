@@ -1,6 +1,6 @@
 # #####################################################################
 # User configuration.
-# -- Nothing to configure at the moment.
+MAX_TASKS = 1000 # max number of tasks per trace
 
 # #####################################################################
 # Internal configuration.
@@ -21,6 +21,7 @@ env = Environment(
     CC = 'gcc',
     CCFLAGS = Split(DEBUG_FLAGS),
     CPPPATH = Split(INCLUDE_DIRS),
+    CPPDEFINES = '-DMAX_TASKS=%d' % MAX_TASKS,
 )
 
 # Link with libcairo. For now without sched_trace support.
