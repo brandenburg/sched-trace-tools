@@ -15,13 +15,14 @@ static void usage(const char *str)
 		"\n"
 		"  OPTIONS\n"
 		"     -r         -- find task system release and exit\n"
+		"     -c         -- display a count of the number of events\n"
 		"\n\n"
 		);
 	fprintf(stderr, "Aborted: %s\n", str);
 	exit(1);
 }
 
-#define OPTSTR "r"
+#define OPTSTR "rc"
 
 int main(int argc, char** argv)
 {
@@ -31,12 +32,16 @@ int main(int argc, char** argv)
 	u64 time;
 	struct st_event_record *rec;
 	int find_release = 0;
+	int show_count = 0;
 	int opt;
 
 	while ((opt = getopt(argc, argv, OPTSTR)) != -1) {
 		switch (opt) {
 		case 'r':
 			find_release = 1;
+			break;
+		case 'c':
+			show_count = 1;
 			break;
 		case ':':
 			usage("Argument missing.");
@@ -52,7 +57,7 @@ int main(int argc, char** argv)
 	h = load(argv + optind, argc - optind, &count);
 	if (!h)
 		return 1;
-	if (!find_release)
+	if (show_count)
 		printf("Loaded %u events.\n", count);
 	while ((hn = heap_take(earlier_event, h))) {
 		time =  event_time(heap_node_value(hn));
