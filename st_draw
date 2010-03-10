@@ -76,9 +76,9 @@ LITMUS^RT Schedule Drawing Utility
 
 Usage: st_draw [OPTIONS] <sched trace file>*
 
-Options:	
+Options:
 	-f FROM
-	--from FROM	Start at time FROM. 
+	--from FROM	Start at time FROM.
 			Time of system release if not specified.
 
 	-l LENGTH
@@ -96,7 +96,7 @@ Options:
 	--keep		Keep the generated .asy/.pdf files.
 
 	--no-show	Don't start a PDF document viewer.
-	
+
 	-h
 	--help		Show this message and exit.
 EOF
@@ -124,7 +124,7 @@ fi
 if [ -z "$FROM" ]
 then
     info "Searching for task system release..."
-    FROM=`$ST_SHOW -r $TRACES | sed 's/\.[0-9]*ms//'`
+    FROM=`$ST_SHOW -r -f $TRACES | sed 's/\.[0-9]*ms//'`
     if [ -z "$FROM" ]
     then
 	die "No task system release found in trace."
