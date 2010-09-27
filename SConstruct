@@ -24,14 +24,8 @@ env = Environment(
     CPPDEFINES = '-DMAX_TASKS=%d' % MAX_TASKS,
 )
 
-# Link with libcairo. For now without sched_trace support.
-cairo = env.Clone()
-cairo.ParseConfig('pkg-config --cflags --libs cairo')
-
 # #####################################################################
 # Targets: sched_trace tools
 common = ['src/load.c', 'src/eheap.c', 'src/util.c']
 env.Program('st_convert', ['src/st2pl.c'] + common)
 env.Program('st_show', ['src/showst.c'] + common)
-
-cairo.Program('cairo_test', ['src/cairo_test.c'])
