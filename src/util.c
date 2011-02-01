@@ -21,6 +21,7 @@ static const char* event_names[] = {
 	"COMPLETION",
 	"BLOCK",
 	"RESUME",
+	"ACTION",
 	"SYS_RELEASE",
 	"INVALID"
 };
@@ -110,6 +111,7 @@ static print_t print_detail[] = {
 	print_nothing,		/* COMPLETION */
 	print_nothing,		/* BLOCK */
 	print_nothing,		/* RESUME */
+	print_nothing,		/* ACTION */
 	print_time_data2,	/* SYS_RELEASE */
 	print_raw,		/* invalid */
 };

@@ -94,6 +94,7 @@ typedef enum {
 	ST_COMPLETION,
 	ST_BLOCK,
 	ST_RESUME,
+	ST_ACTION,
 	ST_SYS_RELEASE,
 } st_event_record_type_t;
 
