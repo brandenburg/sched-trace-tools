@@ -156,8 +156,8 @@ void split(struct heap* h, unsigned int count, int find_time0)
 		if (find_time0 && !time0 && time)
 			time0 = time;
 		t = by_pid(rec->hdr.pid);
-		if (!t && rec->hdr.pid) {
-			fprintf(stderr, "dropped %d\n", rec->hdr.pid);
+		if (!t) {
+			fprintf(stderr, "dropped record for pid %d\n", rec->hdr.pid);
 			continue;
 		}
 		switch (rec->hdr.type) {
