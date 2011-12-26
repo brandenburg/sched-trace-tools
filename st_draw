@@ -36,6 +36,8 @@ SHOW_PDF=`which evince`
 [ -z "$ST2PL" ] && die "Can't find 'st_convert' utility. (Is it in PATH?)"
 [ -z "$ASY" ] && die "Can't find Asymptote. (Is the 'asy' utility in the PATH?)"
 
+[ ! -r ~/.asy/sched.asy ] && die "Can't find Asymptote schedule module. (Was sched.asy symlinked into ~/.asy?)"
+
 
 KEEP=
 NO_SHOW=
