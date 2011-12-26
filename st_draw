@@ -137,11 +137,11 @@ fi
 if [ -z "$TO" ]
 then
     TO=$(($FROM + $LENGTH))
-    LAST=`$ST_SHOW $TRACES | tail -1 | awk '{print $2}' | sed 's/]//'`
+    LAST=`$ST_SHOW $TRACES | tail -1 | sed 's/\[\([ 0123456789]*\)\].*/\1/g'`
     LASTB=$((($LAST / 10 + 1) * 10))
     if [ $TO -gt $LASTB ]
     then
-	info "Last event  recorded at $LAST."
+	info "Last event recorded at time $LAST."
 	TO=$LASTB
     fi
 fi
