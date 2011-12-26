@@ -18,11 +18,6 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-ST_SHOW=st_show
-ST2PL=st_convert
-ASY=asy
-SHOW_PDF=evince
-
 function die {
     echo "(EE) $*"
     exit 1
@@ -31,6 +26,16 @@ function die {
 function info {
     echo "(II) $*"
 }
+
+ST_SHOW=`which st_show`
+ST2PL=`which st_convert`
+ASY=`which asy`
+SHOW_PDF=`which evince`
+
+[ -z "$ST_SHOW" ] && die "Can't find 'st_show' utility. (Is it in PATH?)"
+[ -z "$ST2PL" ] && die "Can't find 'st_convert' utility. (Is it in PATH?)"
+[ -z "$ASY" ] && die "Can't find Asymptote. (Is the 'asy' utility in the PATH?)"
+
 
 KEEP=
 NO_SHOW=
@@ -164,8 +169,13 @@ $ASY   -f pdf -o $PDF $SCHED || die "$ASY failed."
 
 if [ -z "$NO_SHOW" ]
 then
-    info $SHOW_PDF $PDF
-    $SHOW_PDF $PDF || die "$SHOW_PDF failed."
+    if [ -z "$SHOW_PDF" ]
+    then
+	info "PDF viewer 'evince' could not be found."
+    else
+	info $SHOW_PDF $PDF
+	$SHOW_PDF $PDF || die "$SHOW_PDF failed."
+    fi
 fi
 
 if [ -z "$KEEP" ]
