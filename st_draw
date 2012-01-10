@@ -27,10 +27,23 @@ function info {
     echo "(II) $*"
 }
 
-ST_SHOW=`which st_show`
-ST2PL=`which st_convert`
 ASY=`which asy`
 SHOW_PDF=`which evince`
+
+PATH_TO_SCRIPT=`dirname $0`
+function find_helper()
+{
+    IN_PATH=`which $1`
+    if [ -z "$IN_PATH" ] && [ ! -z "$PATH_TO_SCRIPT" ] &&  [ -x "$PATH_TO_SCRIPT/$1" ]
+    then
+	echo "$PATH_TO_SCRIPT/$1"
+    else
+	echo "$IN_PATH"
+    fi
+}
+
+ST_SHOW=`find_helper st_show`
+ST2PL=`find_helper st_convert`
 
 [ -z "$ST_SHOW" ] && die "Can't find 'st_show' utility. (Is it in PATH?)"
 [ -z "$ST2PL" ] && die "Can't find 'st_convert' utility. (Is it in PATH?)"
