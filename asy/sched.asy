@@ -86,7 +86,8 @@ pen[] cpu_fill = task_fill;
 
 pen grid_pen  = solid + gray(0.75);
 
-pen cpu_label_pen = solid + rgb(0.0, 0.0, 0.0);
+pen cpu_label_pen = Helvetica() + rgb(0.0, 0.0, 0.0);
+pen job_label_pen = cpu_label_pen;
 
 pen idx2color(int idx) {
     return cpu_fill[idx % cpu_fill.length];
@@ -97,9 +98,11 @@ void setup(picture pic=currentpicture, int step=1) {
      yaxis(pic);
 }
 
+real TASK_SPACING = 1.4;
+
 pair task_y(int idx=0, pair base=(0,0))
 {
-	return base + (0, 1 + idx * 1.2);
+	return base + (0, 1 + idx * TASK_SPACING);
 }
 
 pair task_offset(int idx=0, pair base=(0,0))
@@ -127,15 +130,17 @@ void scheduled(picture pic=currentpicture, int idx=0, int cpu=0,  pair time) {
      path g = (time.x, 0.2)--(time.y, 0.2)--(time.y, -0.5)--(time.x, -0.5)--cycle;
      filldraw(pic, shift(task_offset(idx)) *  g, idx2color(cpu));
      Label l = scale(0.6) * Label(format("%d", cpu));
-     label(pic, l, task_y(idx, (time.x + 0.15, +0.05)), cpu_label_pen);
+     label(pic, l, task_y(idx, (time.x + 0.2, +0.085)), cpu_label_pen);
 }
 
-void release(picture pic=currentpicture, int idx=0, real when) {
+void release(picture pic=currentpicture, int idx=0, int job, real when) {
      path g = (when, -0.5)--(when, 0.5)--(when + 0.1, 0.35)--(when - 0.1, 0.35)--(when, 0.5);
      draw(pic,  shift(task_offset(idx)) *g, solid + 0.5);
+     Label l = scale(0.4) * Label(format("%d", job));
+     label(pic, l, task_y(idx, (when, +0.61)), job_label_pen);
 }
 
-void deadline(picture pic=currentpicture, int idx=0, real when) {
+void deadline(picture pic=currentpicture, int idx=0, int job, real when) {
      path g = (when, 0.5)--(when, -0.5)--(when - 0.1, -0.35)--(when + 0.1, -0.35)--(when, -0.5);
      draw(pic,  shift(task_offset(idx)) * g, solid + 0.5);
 }
@@ -150,7 +155,7 @@ void resumed(picture pic=currentpicture, int idx=0, real when) {
      filldraw(pic, shift(task_offset(idx)) * g, white);
 }
 
-void completed(picture pic=currentpicture, int idx=0, real when) {
+void completed(picture pic=currentpicture, int idx=0, int job, real when) {
 //     path  g = (when, -0.5)--(when, 0.5);
 //     path  c = scale(0.1) * (shift(0, 0) * unitcircle);
 //     draw(pic, shift(task_offset(idx, (when, 0.4))) * c);
@@ -159,6 +164,8 @@ void completed(picture pic=currentpicture, int idx=0, real when) {
      path g2 = (when - 0.1, 0.5)--(when + 0.1, 0.5);
      draw(pic,  shift(task_offset(idx)) * g1, solid + 0.5);
      draw(pic,  shift(task_offset(idx)) * g2, solid + 0.5);
+     Label l = scale(0.4) * Label(format("%d", job));
+     label(pic, l, task_y(idx, (when, +0.61)), job_label_pen);
 }
 
 void draw_grid(picture pic=currentpicture, real xstep=1.0, real f=__from,

@@ -124,9 +124,9 @@ static void write_asy(double from, double to)
 			t1 = ns2ms_adj(e->rec->data.release.release);
 			t2 = ns2ms_adj(e->rec->data.release.deadline);
 			if (in_range(from, t1, to))
-				printf("release(%u, %f);\n", idx(t), t1);
+				printf("release(%u, %u, %f);\n", idx(t), e->rec->hdr.job, t1);
 			if (in_range(from, t2, to))
-				printf("deadline(%u, %f);\n", idx(t), t2);
+				printf("deadline(%u, %u, %f);\n", idx(t), e->rec->hdr.job, t2);
 		}
 	}
 
@@ -134,7 +134,7 @@ static void write_asy(double from, double to)
 		for_each_event_t(t, e, ST_COMPLETION) {
 			t1 = ns2ms_adj(e->rec->data.completion.when);
 			if (in_range(from, t1, to))
-			    printf("completed(%u, %f);\n", idx(t), t1);
+				printf("completed(%u, %u, %f);\n", idx(t), e->rec->hdr.job, t1);
 		}
 	}
 
