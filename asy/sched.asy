@@ -129,8 +129,8 @@ real center = 0.2 - (0.7 / 2.0);
 void scheduled(picture pic=currentpicture, int idx=0, int cpu=0,  pair time) {
      path g = (time.x, 0.2)--(time.y, 0.2)--(time.y, -0.5)--(time.x, -0.5)--cycle;
      filldraw(pic, shift(task_offset(idx)) *  g, idx2color(cpu));
-     Label l = scale(0.6) * Label(format("%d", cpu));
-     label(pic, l, task_y(idx, (time.x + 0.2, +0.085)), cpu_label_pen);
+     Label l = scale(0.5) * Label(format("%d", cpu));
+     label(pic, l, task_y(idx, (time.x + 0.2, +0.075)), cpu_label_pen);
 }
 
 void release(picture pic=currentpicture, int idx=0, int job, real when) {
@@ -153,6 +153,17 @@ void blocked(picture pic=currentpicture, int idx=0, real when) {
 void resumed(picture pic=currentpicture, int idx=0, real when) {
      path g = (when, center + 0.1)--(when + 0.1, center)--(when, center -0.1)--cycle;
      filldraw(pic, shift(task_offset(idx)) * g, white);
+}
+
+void non_preemptive(picture pic=currentpicture, int idx=0, pair time) {
+     real bar_width =  0.05;
+     real bar_shift = -bar_width / 2;
+     path g = (time.x, 0.2)--
+              (time.x, 0.2 + bar_width)--
+              (time.y, 0.2 + bar_width)--
+              (time.y, 0.2)--cycle;
+     g = shift((0, bar_shift)) * g;
+     filldraw(pic, shift(task_offset(idx)) *  g, black);
 }
 
 void completed(picture pic=currentpicture, int idx=0, int job, real when) {

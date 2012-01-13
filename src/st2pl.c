@@ -72,6 +72,21 @@ static void write_prolog_kb(void)
 			       ns2ms_adj(e->rec->data.resume.when));
 		}
 	}
+
+	for_each_task(t) {
+		e = t->events;
+		while (e) {
+			find(e, ST_NP_ENTER);
+			e2 = e;
+			find(e, ST_NP_EXIT);
+			printf("non_preemptive(job(%u, %u), %f, %f).\n",
+			       e2->rec->hdr.pid,
+			       e2->rec->hdr.job,
+			       ns2ms_adj(event_time(e2->rec)),
+			       ns2ms_adj(event_time(e->rec)));
+		}
+	}
+
 }
 
 int intersect(double *x, double *y, double from, double to)
@@ -151,6 +166,36 @@ static void write_asy(double from, double to)
 			t1 = ns2ms_adj(e->rec->data.resume.when);
 			if (in_range(from, t1, to))
 				printf("resumed(%u, %f);\n", idx(t), t1);
+		}
+	}
+
+	for_each_task(t) {
+		e = t->events;
+		while (e) {
+			find(e, ST_NP_ENTER);
+			e2 = e;
+			find(e, ST_NP_EXIT);
+			t1 = ns2ms_adj(event_time(e2->rec));
+			t2 = ns2ms_adj(event_time(e->rec));
+			if (intersect(&t1, &t2, from, to))
+				printf("non_preemptive(%u, (%f, %f));\n",
+				       idx(t), t1, t2);
+		}
+	}
+
+	for_each_task(t) {
+		for_each_event_t(t, e, ST_NP_ENTER) {
+			t1 = ns2ms_adj(event_time(e->rec));
+			if (in_range(from, t1, to))
+				printf("np_entered(%u, %f);\n", idx(t), t1);
+		}
+	}
+
+	for_each_task(t) {
+		for_each_event_t(t, e, ST_NP_EXIT) {
+			t1 = ns2ms_adj(event_time(e->rec));
+			if (in_range(from, t1, to))
+				printf("np_exited(%u, %f);\n", idx(t), t1);
 		}
 	}
 

@@ -76,6 +76,16 @@ struct st_resume_data {		/* A task resumes. */
 	u64	__unused;
 };
 
+struct st_np_enter_data {	/* A task becomes non-preemptable.  */
+	u64	when;
+	u64	__unused;
+};
+
+struct st_np_exit_data {       	/* A task becomes preemptable again. */
+	u64	when;
+	u64	__unused;
+};
+
 struct st_sys_release_data {
 	u64	when;
 	u64	release;
@@ -96,6 +106,10 @@ typedef enum {
 	ST_RESUME,
 	ST_ACTION,
 	ST_SYS_RELEASE,
+	ST_NP_ENTER,
+	ST_NP_EXIT,
+
+	ST_INVALID              /* Dummy ID to catch too-large IDs. */
 } st_event_record_type_t;
 
 struct st_event_record {
@@ -113,7 +127,8 @@ struct st_event_record {
 		DATA(block);
 		DATA(resume);
 		DATA(sys_release);
-
+		DATA(np_enter);
+		DATA(np_exit);
 	} data;
 };
 

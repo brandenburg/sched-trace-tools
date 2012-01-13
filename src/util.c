@@ -23,11 +23,10 @@ static const char* event_names[] = {
 	"RESUME",
 	"ACTION",
 	"SYS_RELEASE",
+	"NP_ENTER",
+	"NP_EXIT",
 	"INVALID"
 };
-
-#define ST_INVALID (ST_SYS_RELEASE + 1)
-
 
 const char* event2name(unsigned int id)
 {
@@ -49,6 +48,8 @@ u64 event_time(struct st_event_record* rec)
 	case ST_COMPLETION:
 	case ST_BLOCK:
 	case ST_RESUME:
+	case ST_NP_ENTER:
+	case ST_NP_EXIT:
 	case ST_SYS_RELEASE:
 		when = rec->data.raw[0];
 		break;
