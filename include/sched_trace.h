@@ -86,6 +86,12 @@ struct st_np_exit_data {       	/* A task becomes preemptable again. */
 	u64	__unused;
 };
 
+struct st_action_data {		/* Catch-all for misc. events. */
+	u64	when;
+	u8	action;
+	u8	__unused[7];
+};
+
 struct st_sys_release_data {
 	u64	when;
 	u64	release;
@@ -126,6 +132,7 @@ struct st_event_record {
 		DATA(completion);
 		DATA(block);
 		DATA(resume);
+		DATA(action);
 		DATA(sys_release);
 		DATA(np_enter);
 		DATA(np_exit);

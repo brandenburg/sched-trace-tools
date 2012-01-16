@@ -50,6 +50,7 @@ u64 event_time(struct st_event_record* rec)
 	case ST_RESUME:
 	case ST_NP_ENTER:
 	case ST_NP_EXIT:
+	case ST_ACTION:
 	case ST_SYS_RELEASE:
 		when = rec->data.raw[0];
 		break;
@@ -101,6 +102,11 @@ static void print_time_data2(struct st_event_record* rec)
 	printf("%6.2fms", rec->data.raw[1] / 1000000.0);
 }
 
+static void print_action(struct st_event_record* rec)
+{
+	printf(" action=%u", rec->data.action.action);
+}
+
 static print_t print_detail[] = {
 	print_raw,		/* invalid */
 	print_name,		/* NAME  */
@@ -112,7 +118,7 @@ static print_t print_detail[] = {
 	print_nothing,		/* COMPLETION */
 	print_nothing,		/* BLOCK */
 	print_nothing,		/* RESUME */
-	print_nothing,		/* ACTION */
+	print_action,		/* ACTION */
 	print_time_data2,	/* SYS_RELEASE */
 	print_nothing,		/* NP_ENTER */
 	print_nothing,		/* NP_EXIT */
