@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <assert.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -114,12 +114,17 @@ static print_t print_detail[] = {
 	print_nothing,		/* RESUME */
 	print_nothing,		/* ACTION */
 	print_time_data2,	/* SYS_RELEASE */
+	print_nothing,		/* NP_ENTER */
+	print_nothing,		/* NP_EXIT */
 	print_raw,		/* invalid */
 };
 
 void print_event(struct st_event_record *rec)
 {
 	unsigned int id = rec->hdr.type;
+
+	/* ensure there's a handler for each ID */
+	assert(sizeof(print_detail) / sizeof(print_detail[0]) == ST_INVALID + 1);
 
 	if (id >= ST_INVALID)
 		id = ST_INVALID;

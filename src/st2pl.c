@@ -182,25 +182,6 @@ static void write_asy(double from, double to)
 				       idx(t), t1, t2);
 		}
 	}
-
-	for_each_task(t) {
-		for_each_event_t(t, e, ST_NP_ENTER) {
-			t1 = ns2ms_adj(event_time(e->rec));
-			if (in_range(from, t1, to))
-				printf("np_entered(%u, %f);\n", idx(t), t1);
-		}
-	}
-
-	for_each_task(t) {
-		for_each_event_t(t, e, ST_NP_EXIT) {
-			t1 = ns2ms_adj(event_time(e->rec));
-			if (in_range(from, t1, to))
-				printf("np_exited(%u, %f);\n", idx(t), t1);
-		}
-	}
-
-//	printf("yaxis();\n");
-//	printf("xaxis(\"time (ms)\", BottomTop);\n");
 }
 
 
