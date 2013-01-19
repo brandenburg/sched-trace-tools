@@ -224,7 +224,6 @@ static lang_t str2mode(const char* str)
 
 int main(int argc, char** argv)
 {
-	int i;
 	unsigned int count;
 	int opt;
 	double from = 0.0;
@@ -232,10 +231,7 @@ int main(int argc, char** argv)
 	lang_t mode = PROLOG;
 	struct heap *h;
 
-	for (i = 0; i < MAX_TASKS; i++) {
-		tasks[i] = (struct task) {0, 0, NULL, NULL, NULL, NULL};
-		tasks[i].next = &tasks[i].events;
-	}
+	init_tasks();
 
 	while ((opt = getopt(argc, argv, OPTSTR)) != -1) {
 		switch (opt) {

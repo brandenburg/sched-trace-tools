@@ -29,3 +29,4 @@ env = Environment(
 common = ['src/load.c', 'src/eheap.c', 'src/util.c']
 env.Program('st_convert', ['src/st2pl.c'] + common)
 env.Program('st_show', ['src/showst.c'] + common)
+env.Program('st_job_stats', ['src/job_stats.c'] + common)

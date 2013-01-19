@@ -1,0 +1,169 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "load.h"
+#include "sched_trace.h"
+#include "eheap.h"
+
+int want_ms = 0;
+
+static double nano_to_ms(int64_t ns)
+{
+	return ns * 1E-6;
+}
+
+static void print_stats(
+	struct task* t,
+	struct st_event_record *release,
+	struct st_event_record *completion)
+{
+	int64_t lateness;
+	u64 response;
+
+	lateness  = completion->data.completion.when;
+	lateness -= release->data.release.deadline;
+	response  = completion->data.completion.when;
+	response -= release->data.release.release;
+
+	if (want_ms)
+		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f\n",
+		       release->hdr.pid,
+		       release->hdr.job,
+		       nano_to_ms(per(t)),
+		       nano_to_ms(response),
+		       lateness > 0,
+		       nano_to_ms(lateness),
+		       lateness > 0 ? nano_to_ms(lateness) : 0);
+	else
+		printf(" %5u, %5u, %10llu, %10llu, %8d, %10lld, %10lld\n",
+		       release->hdr.pid,
+		       release->hdr.job,
+		       (unsigned long long) per(t),
+		       (unsigned long long) response,
+		       lateness > 0,
+		       (long long) lateness,
+		       lateness > 0 ? (long long) lateness : 0);
+}
+
+static void print_task_info(struct task *t)
+{
+	if (want_ms)
+		printf("# task NAME=%s PID=%d COST=%.2f PERIOD=%.2f CPU=%d\n",
+		       tsk_name(t),
+		       t->pid,
+		       nano_to_ms(exe(t)),
+		       nano_to_ms(per(t)),
+		       tsk_cpu(t));
+	else
+		printf("# task NAME=%s PID=%d COST=%lu PERIOD=%lu CPU=%d\n",
+		       tsk_name(t),
+		       t->pid,
+		       (unsigned long) exe(t),
+		       (unsigned long) per(t),
+		       tsk_cpu(t));
+}
+
+static void usage(const char *str)
+{
+	fprintf(stderr,
+		"\n  USAGE\n"
+		"\n"
+		"    st_job_stats [opts] <file.st>+\n"
+		"\n"
+		"  OPTIONS\n"
+		"     -r         -- skip jobs prior to task-system release\n"
+		"     -m         -- output milliseconds (default: nanoseconds)\n"
+		"\n\n"
+		);
+	fprintf(stderr, "Aborted: %s\n", str);
+	exit(1);
+}
+
+#define OPTSTR "rm"
+
+int main(int argc, char** argv)
+{
+	unsigned int count;
+	struct heap *h;
+
+	struct task *t;
+	struct evlink *e, *pos;
+	struct st_event_record *rec;
+
+	int wait_for_release = 0;
+	u64 sys_release = 0;
+
+	int opt;
+
+	while ((opt = getopt(argc, argv, OPTSTR)) != -1) {
+		switch (opt) {
+		case 'r':
+			wait_for_release = 1;
+			break;
+		case 'm':
+			want_ms = 1;
+			break;
+		case ':':
+			usage("Argument missing.");
+			break;
+		case '?':
+		default:
+			usage("Bad argument.");
+			break;
+		}
+	}
+
+
+	h = load(argv + optind, argc - optind, &count);
+	if (!h)
+		return 1;
+
+	init_tasks();
+	split(h, count, 1);
+
+	if (wait_for_release) {
+		rec = find_sys_event(ST_SYS_RELEASE);
+		if (rec)
+			sys_release = rec->data.sys_release.release;
+		else {
+			fprintf(stderr, "Could not find task system "
+				"release time.\n");
+			exit(1);
+		}
+	}
+
+	/* print header */
+	printf("#%5s, %5s, %10s, %10s, %8s, %10s, %10s\n",
+	       "Task",
+	       "Job",
+	       "Period",
+	       "Response",
+	       "DL Miss?",
+	       "Lateness",
+	       "Tardiness");
+
+	/* print stats for each task */
+	for_each_task(t) {
+		print_task_info(t);
+		for_each_event(t, e) {
+			rec = e->rec;
+			if (rec->hdr.type == ST_RELEASE &&
+			    (!wait_for_release ||
+			     rec->data.release.release >= sys_release)) {
+				pos  = e;
+				while (pos) {
+					find(pos, ST_COMPLETION);
+					if (pos->rec->hdr.job == rec->hdr.job) {
+						print_stats(t, rec, pos->rec);
+						break;
+					} else
+						pos = pos->next;
+				}
+
+			}
+		}
+	}
+
+	return 0;
+}

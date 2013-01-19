@@ -90,6 +90,16 @@ u64 time0 = 0;
 u32 g_max_task = MAX_TASKS;
 u32 g_min_task = 0;
 
+void init_tasks(void)
+{
+	int i;
+
+	for (i = 0; i < MAX_TASKS; i++) {
+		tasks[i] = (struct task) {0, 0, NULL, NULL, NULL, NULL};
+		tasks[i].next = &tasks[i].events;
+	}
+}
+
 void crop_events(struct task* t, double min, double max)
 {
 	struct evlink **p;
@@ -156,16 +166,20 @@ void split(struct heap* h, unsigned int count, int find_time0)
 		if (find_time0 && !time0 && time)
 			time0 = time;
 		t = by_pid(rec->hdr.pid);
-		if (!t) {
-			fprintf(stderr, "dropped record for pid %d\n", rec->hdr.pid);
-			continue;
-		}
 		switch (rec->hdr.type) {
 		case ST_PARAM:
-			t->param = rec;
+			if (t)
+				t->param = rec;
+			else
+				fprintf(stderr, "Dropped ST_PARAM record "
+					"for PID %d.\n", rec->hdr.pid);
 			break;
 		case ST_NAME:
-			t->name = rec;
+			if (t)
+				t->name = rec;
+			else
+				fprintf(stderr, "Dropped ST_NAME record "
+					"for PID %d.\n", rec->hdr.pid);
 			break;
 		default:
 			lnk->rec = rec;
@@ -182,6 +196,14 @@ void split(struct heap* h, unsigned int count, int find_time0)
 			break;
 		}
 	}
+}
+
+int tsk_cpu(struct task *t)
+{
+	if (t->param)
+		return t->param->data.param.partition;
+	else
+		return -1;
 }
 
 const char* tsk_name(struct task* t)

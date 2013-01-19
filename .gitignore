@@ -1,9 +1,12 @@
+*~
+*.bin
 *.o
 *.a
 *.eps
 *.pdf
 st_show
 st_convert
+st_job_stats
 \#*
 .\#*
 .sconsign.dblite

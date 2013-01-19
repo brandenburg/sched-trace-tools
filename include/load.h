@@ -47,12 +47,15 @@ void crop_events_all(double min, double max);
 
 struct task* by_pid(int pid);
 
+void init_tasks(void);
 void split(struct heap* h, unsigned int count, int find_time0);
 
 const char* tsk_name(struct task* t);
+int tsk_cpu(struct task *t);
 u32 per(struct task* t);
 u32 exe(struct task* t);
 u32 idx(struct task* t);
+
 
 u32 count_tasks(void);
 
@@ -67,8 +70,21 @@ u32 count_tasks(void);
 #define for_each_event_t(t, e, evtype) \
 	for_each_event(t, e) if (e->rec->hdr.type == evtype)
 
+#define find_evtype(e, evtype) \
+	while (e && e->rec->hdr.type != evtype) e = e->next;
+
 #define find(e, evtype) \
 	while (e && e->rec->hdr.type != evtype) e = e->next; if (!e) break;
 
+
+static inline struct st_event_record *find_sys_event(u8 type)
+{
+	struct evlink* pos = sys_events;
+	find_evtype(pos, type);
+	if (pos)
+		return pos->rec;
+	else
+		return NULL;
+}
 
 #endif
