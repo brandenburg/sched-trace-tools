@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "load.h"
 #include "sched_trace.h"
@@ -74,13 +75,15 @@ static void usage(const char *str)
 		"  OPTIONS\n"
 		"     -r         -- skip jobs prior to task-system release\n"
 		"     -m         -- output milliseconds (default: nanoseconds)\n"
+		"     -p PID     -- show only data for the task with the given PID\n"
+		"     -n NAME    -- show only data for the task(s) the given NAME\n"
 		"\n\n"
 		);
 	fprintf(stderr, "Aborted: %s\n", str);
 	exit(1);
 }
 
-#define OPTSTR "rm"
+#define OPTSTR "rmp:n:"
 
 int main(int argc, char** argv)
 {
@@ -93,6 +96,8 @@ int main(int argc, char** argv)
 
 	int wait_for_release = 0;
 	u64 sys_release = 0;
+	unsigned int pid_filter = 0;
+	const char* name_filter = 0;
 
 	int opt;
 
@@ -103,6 +108,14 @@ int main(int argc, char** argv)
 			break;
 		case 'm':
 			want_ms = 1;
+			break;
+		case 'p':
+			pid_filter = atoi(optarg);
+			if (!pid_filter)
+				usage("Invalid PID.");
+			break;
+		case 'n':
+			name_filter = optarg;
 			break;
 		case ':':
 			usage("Argument missing.");
@@ -145,6 +158,11 @@ int main(int argc, char** argv)
 
 	/* print stats for each task */
 	for_each_task(t) {
+		if (pid_filter && pid_filter != t->pid)
+			continue;
+		if (name_filter && strcmp(tsk_name(t), name_filter))
+			continue;
+
 		print_task_info(t);
 		for_each_event(t, e) {
 			rec = e->rec;
