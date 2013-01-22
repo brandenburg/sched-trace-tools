@@ -76,14 +76,15 @@ static void usage(const char *str)
 		"     -r         -- skip jobs prior to task-system release\n"
 		"     -m         -- output milliseconds (default: nanoseconds)\n"
 		"     -p PID     -- show only data for the task with the given PID\n"
-		"     -n NAME    -- show only data for the task(s) the given NAME\n"
+		"     -n NAME    -- show only data for the task(s) with the given NAME\n"
+		"     -t PERIOD  -- show only data for the task(s) with the given PERIOD\n"
 		"\n\n"
 		);
 	fprintf(stderr, "Aborted: %s\n", str);
 	exit(1);
 }
 
-#define OPTSTR "rmp:n:"
+#define OPTSTR "rmp:n:t:"
 
 int main(int argc, char** argv)
 {
@@ -96,8 +97,10 @@ int main(int argc, char** argv)
 
 	int wait_for_release = 0;
 	u64 sys_release = 0;
+
 	unsigned int pid_filter = 0;
 	const char* name_filter = 0;
+	u32 period_filter = 0;
 
 	int opt;
 
@@ -114,6 +117,11 @@ int main(int argc, char** argv)
 			if (!pid_filter)
 				usage("Invalid PID.");
 			break;
+		case 't':
+			period_filter = atoi(optarg);
+			if (!period_filter)
+				usage("Invalid period.");
+			break;
 		case 'n':
 			name_filter = optarg;
 			break;
@@ -127,6 +135,8 @@ int main(int argc, char** argv)
 		}
 	}
 
+	if (want_ms)
+		period_filter *= 1000000; /* ns per ms */
 
 	h = load(argv + optind, argc - optind, &count);
 	if (!h)
@@ -161,6 +171,8 @@ int main(int argc, char** argv)
 		if (pid_filter && pid_filter != t->pid)
 			continue;
 		if (name_filter && strcmp(tsk_name(t), name_filter))
+			continue;
+		if (period_filter && period_filter != per(t))
 			continue;
 
 		print_task_info(t);
