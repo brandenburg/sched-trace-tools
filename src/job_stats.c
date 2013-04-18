@@ -7,6 +7,9 @@
 #include "sched_trace.h"
 #include "eheap.h"
 
+/* limit search window in case of missing completions */
+#define MAX_COMPLETIONS_TO_CHECK 20
+
 int want_ms = 0;
 
 static double nano_to_ms(int64_t ns)
@@ -182,13 +185,16 @@ int main(int argc, char** argv)
 			    (!wait_for_release ||
 			     rec->data.release.release >= sys_release)) {
 				pos  = e;
-				while (pos) {
+				count = 0;
+				while (pos && count < MAX_COMPLETIONS_TO_CHECK) {
 					find(pos, ST_COMPLETION);
 					if (pos->rec->hdr.job == rec->hdr.job) {
 						print_stats(t, rec, pos->rec);
 						break;
-					} else
+					} else {
 						pos = pos->next;
+						count++;
+					}
 				}
 
 			}
