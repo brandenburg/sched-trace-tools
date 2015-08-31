@@ -31,23 +31,25 @@ static void print_stats(
 	response -= release->data.release.release;
 
 	if (want_ms)
-		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f\n",
+		printf(" %5u, %5u, %10.2f, %10.2f, %8d, %10.2f, %10.2f,%7d\n",
 		       release->hdr.pid,
 		       release->hdr.job,
 		       nano_to_ms(per(t)),
 		       nano_to_ms(response),
 		       lateness > 0,
 		       nano_to_ms(lateness),
-		       lateness > 0 ? nano_to_ms(lateness) : 0);
+		       lateness > 0 ? nano_to_ms(lateness) : 0,
+		       completion->data.completion.forced);
 	else
-		printf(" %5u, %5u, %10llu, %10llu, %8d, %10lld, %10lld\n",
+		printf(" %5u, %5u, %10llu, %10llu, %8d, %10lld, %10lld,%7d\n",
 		       release->hdr.pid,
 		       release->hdr.job,
 		       (unsigned long long) per(t),
 		       (unsigned long long) response,
 		       lateness > 0,
 		       (long long) lateness,
-		       lateness > 0 ? (long long) lateness : 0);
+		       lateness > 0 ? (long long) lateness : 0,
+		       completion->data.completion.forced);
 }
 
 static void print_task_info(struct task *t)
@@ -160,14 +162,15 @@ int main(int argc, char** argv)
 	}
 
 	/* print header */
-	printf("#%5s, %5s, %10s, %10s, %8s, %10s, %10s\n",
+	printf("#%5s, %5s, %10s, %10s, %8s, %10s, %10s, %7s\n",
 	       "Task",
 	       "Job",
 	       "Period",
 	       "Response",
 	       "DL Miss?",
 	       "Lateness",
-	       "Tardiness");
+	       "Tardiness",
+	       "Forced?");
 
 	/* print stats for each task */
 	for_each_task(t) {
